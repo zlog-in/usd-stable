@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { fetchStablecoinHistory, DEFILLAMA_IDS } from "@/lib/defillama";
 import { HistoryResponse } from "@/lib/types";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 export async function GET() {
   const [usdt, usdc] = await Promise.allSettled([

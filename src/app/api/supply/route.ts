@@ -3,7 +3,8 @@ import { ALL_CHAINS } from "@/lib/config";
 import { fetchSupply } from "@/lib/rpc";
 import { ChainSupply, SupplyResponse } from "@/lib/types";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 export async function GET() {
   const results = await Promise.allSettled(
