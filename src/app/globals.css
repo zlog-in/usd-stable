@@ -7,6 +7,11 @@
   --card-border: #1e1e2e;
   --accent-usdt: #26A17B;
   --accent-usdc: #2775CA;
+  --accent-dai: #F5AC37;
+  --accent-pyusd: #0070E0;
+  --accent-fdusd: #2BCA6E;
+  --accent-gho: #B6509E;
+  --accent-usde: #DFBF68;
   --muted: #6b7280;
 }
 
@@ -17,6 +22,11 @@
   --color-card-border: var(--card-border);
   --color-accent-usdt: var(--accent-usdt);
   --color-accent-usdc: var(--accent-usdc);
+  --color-accent-dai: var(--accent-dai);
+  --color-accent-pyusd: var(--accent-pyusd);
+  --color-accent-fdusd: var(--accent-fdusd);
+  --color-accent-gho: var(--accent-gho);
+  --color-accent-usde: var(--accent-usde);
   --color-muted: var(--muted);
   --font-sans: var(--font-inter);
 }

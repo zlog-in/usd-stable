@@ -1,20 +1,27 @@
 import { NextResponse } from "next/server";
-import { fetchStablecoinHistory, DEFILLAMA_IDS } from "@/lib/defillama";
+import { fetchStablecoinHistory, resolveDefiLlamaId } from "@/lib/defillama";
+import { STABLECOINS } from "@/lib/config";
 import { HistoryResponse } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
 export async function GET() {
-  const [usdt, usdc] = await Promise.allSettled([
-    fetchStablecoinHistory(DEFILLAMA_IDS.USDT),
-    fetchStablecoinHistory(DEFILLAMA_IDS.USDC),
-  ]);
+  const entries = await Promise.allSettled(
+    STABLECOINS.map(async (sc) => {
+      const id = await resolveDefiLlamaId(sc.symbol);
+      if (!id) return { symbol: sc.symbol, data: [] };
+      const data = await fetchStablecoinHistory(id);
+      return { symbol: sc.symbol, data };
+    })
+  );
 
-  const response: HistoryResponse = {
-    usdt: usdt.status === "fulfilled" ? usdt.value : [],
-    usdc: usdc.status === "fulfilled" ? usdc.value : [],
-  };
+  const response: HistoryResponse = {};
+  for (const entry of entries) {
+    if (entry.status === "fulfilled") {
+      response[entry.value.symbol.toLowerCase()] = entry.value.data;
+    }
+  }
 
   return NextResponse.json(response, {
     headers: {

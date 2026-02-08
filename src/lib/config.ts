@@ -1,4 +1,18 @@
-import { ChainConfig } from "./types";
+import { ChainConfig, Stablecoin, StablecoinMeta } from "./types";
+
+export const STABLECOINS: StablecoinMeta[] = [
+  { symbol: "USDT", name: "Tether", color: "#26A17B", coingeckoId: "tether", defillamaName: "Tether" },
+  { symbol: "USDC", name: "USD Coin", color: "#2775CA", coingeckoId: "usd-coin", defillamaName: "USD Coin" },
+  { symbol: "DAI", name: "Dai", color: "#F5AC37", coingeckoId: "dai", defillamaName: "Dai" },
+  { symbol: "FDUSD", name: "First Digital USD", color: "#2BCA6E", coingeckoId: "first-digital-usd", defillamaName: "FDUSD" },
+  { symbol: "GHO", name: "GHO", color: "#B6509E", coingeckoId: "gho", defillamaName: "GHO" },
+  { symbol: "USDe", name: "USDe", color: "#DFBF68", coingeckoId: "ethena-usde", defillamaName: "USDe" },
+  { symbol: "PYUSD", name: "PayPal USD", color: "#0070E0", coingeckoId: "paypal-usd", defillamaName: "PayPal USD" },
+];
+
+export function getStablecoinColor(symbol: Stablecoin): string {
+  return STABLECOINS.find((s) => s.symbol === symbol)?.color ?? "#6b7280";
+}
 
 export const USDT_CHAINS: ChainConfig[] = [
   {
@@ -12,7 +26,6 @@ export const USDT_CHAINS: ChainConfig[] = [
     explorerAddressPath: "/token/",
     chainType: "evm",
     color: "#627EEA",
-    defillamaId: "tether",
   },
   {
     id: "tron-usdt",
@@ -173,7 +186,6 @@ export const USDC_CHAINS: ChainConfig[] = [
     explorerAddressPath: "/token/",
     chainType: "evm",
     color: "#627EEA",
-    defillamaId: "usd-coin",
   },
   {
     id: "arbitrum-usdc",
@@ -526,8 +538,129 @@ export const USDC_CHAINS: ChainConfig[] = [
   },
 ];
 
-export const ALL_CHAINS = [...USDT_CHAINS, ...USDC_CHAINS];
+export const DAI_CHAINS: ChainConfig[] = [
+  {
+    id: "ethereum-dai",
+    name: "Ethereum",
+    token: "DAI",
+    contractAddress: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    decimals: 18,
+    rpcUrl: "https://eth.llamarpc.com",
+    explorerUrl: "https://etherscan.io",
+    explorerAddressPath: "/token/",
+    chainType: "evm",
+    color: "#627EEA",
+  },
+];
 
-export function getChainsByToken(token: "USDT" | "USDC"): ChainConfig[] {
-  return token === "USDT" ? USDT_CHAINS : USDC_CHAINS;
+export const FDUSD_CHAINS: ChainConfig[] = [
+  {
+    id: "ethereum-fdusd",
+    name: "Ethereum",
+    token: "FDUSD",
+    contractAddress: "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+    decimals: 18,
+    rpcUrl: "https://eth.llamarpc.com",
+    explorerUrl: "https://etherscan.io",
+    explorerAddressPath: "/token/",
+    chainType: "evm",
+    color: "#627EEA",
+  },
+  {
+    id: "bsc-fdusd",
+    name: "BNB Chain",
+    token: "FDUSD",
+    contractAddress: "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+    decimals: 18,
+    rpcUrl: "https://bsc-dataseed.binance.org",
+    explorerUrl: "https://bscscan.com",
+    explorerAddressPath: "/token/",
+    chainType: "evm",
+    color: "#F3BA2F",
+  },
+];
+
+export const GHO_CHAINS: ChainConfig[] = [
+  {
+    id: "ethereum-gho",
+    name: "Ethereum",
+    token: "GHO",
+    contractAddress: "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+    decimals: 18,
+    rpcUrl: "https://eth.llamarpc.com",
+    explorerUrl: "https://etherscan.io",
+    explorerAddressPath: "/token/",
+    chainType: "evm",
+    color: "#627EEA",
+  },
+  {
+    id: "arbitrum-gho",
+    name: "Arbitrum",
+    token: "GHO",
+    contractAddress: "0x7dfF72693f6A4149b17e7C6314655f6A9F7c8B33",
+    decimals: 18,
+    rpcUrl: "https://arb1.arbitrum.io/rpc",
+    explorerUrl: "https://arbiscan.io",
+    explorerAddressPath: "/token/",
+    chainType: "evm",
+    color: "#12AAFF",
+  },
+];
+
+export const USDE_CHAINS: ChainConfig[] = [
+  {
+    id: "ethereum-usde",
+    name: "Ethereum",
+    token: "USDe",
+    contractAddress: "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+    decimals: 18,
+    rpcUrl: "https://eth.llamarpc.com",
+    explorerUrl: "https://etherscan.io",
+    explorerAddressPath: "/token/",
+    chainType: "evm",
+    color: "#627EEA",
+  },
+];
+
+export const PYUSD_CHAINS: ChainConfig[] = [
+  {
+    id: "ethereum-pyusd",
+    name: "Ethereum",
+    token: "PYUSD",
+    contractAddress: "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8",
+    decimals: 6,
+    rpcUrl: "https://eth.llamarpc.com",
+    explorerUrl: "https://etherscan.io",
+    explorerAddressPath: "/token/",
+    chainType: "evm",
+    color: "#627EEA",
+  },
+  {
+    id: "solana-pyusd",
+    name: "Solana",
+    token: "PYUSD",
+    contractAddress: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
+    decimals: 6,
+    rpcUrl: "https://api.mainnet-beta.solana.com",
+    explorerUrl: "https://solscan.io",
+    explorerAddressPath: "/token/",
+    chainType: "solana",
+    color: "#9945FF",
+  },
+];
+
+const CHAIN_MAP: Record<Stablecoin, ChainConfig[]> = {
+  USDT: USDT_CHAINS,
+  USDC: USDC_CHAINS,
+  DAI: DAI_CHAINS,
+  FDUSD: FDUSD_CHAINS,
+  GHO: GHO_CHAINS,
+  USDe: USDE_CHAINS,
+  PYUSD: PYUSD_CHAINS,
+};
+
+export const ALL_CHAINS = Object.values(CHAIN_MAP).flat();
+
+export function getChainsByToken(token: Stablecoin): ChainConfig[] {
+  return CHAIN_MAP[token] ?? [];
 }

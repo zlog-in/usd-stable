@@ -1,4 +1,12 @@
-export type Stablecoin = "USDT" | "USDC";
+export type Stablecoin = "USDT" | "USDC" | "DAI" | "PYUSD" | "FDUSD" | "GHO" | "USDe";
+
+export interface StablecoinMeta {
+  symbol: Stablecoin;
+  name: string;
+  color: string;
+  coingeckoId: string;
+  defillamaName: string;
+}
 
 export interface ChainConfig {
   id: string;
@@ -27,7 +35,6 @@ export interface ChainConfig {
     | "liquid"
     | "tezos";
   color: string;
-  defillamaId?: string;
 }
 
 export interface ChainSupply {
@@ -54,8 +61,28 @@ export interface HistoryPoint {
 }
 
 export interface HistoryResponse {
-  usdt: HistoryPoint[];
-  usdc: HistoryPoint[];
+  [symbol: string]: HistoryPoint[];
 }
 
 export type TimeRange = "30d" | "90d" | "1y" | "all";
+
+export interface PegData {
+  symbol: string;
+  price: number;
+  change24h: number;
+}
+
+export interface PegResponse {
+  data: PegData[];
+  timestamp: number;
+}
+
+export interface ChainSharePoint {
+  date: string;
+  [chain: string]: number | string;
+}
+
+export interface ChainDetailResponse {
+  chainShares: ChainSharePoint[];
+  changes: Record<string, { change24h: number | null; change7d: number | null }>;
+}

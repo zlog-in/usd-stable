@@ -42,3 +42,19 @@ export function truncateAddress(address: string, chars = 6): string {
   if (address.length <= chars * 2 + 3) return address;
   return `${address.slice(0, chars)}...${address.slice(-chars)}`;
 }
+
+export function formatPercent(value: number): string {
+  const prefix = value > 0 ? "+" : "";
+  return `${prefix}${value.toFixed(2)}%`;
+}
+
+export function formatChange(value: number): string {
+  const prefix = value > 0 ? "+" : "";
+  if (Math.abs(value) >= 1e9) {
+    return `${prefix}$${(value / 1e9).toFixed(2)}B`;
+  }
+  if (Math.abs(value) >= 1e6) {
+    return `${prefix}$${(value / 1e6).toFixed(2)}M`;
+  }
+  return `${prefix}$${value.toFixed(0)}`;
+}

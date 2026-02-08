@@ -8,22 +8,39 @@ import {
   TimeRange,
   SupplyResponse,
   HistoryResponse,
+  PegData,
 } from "@/lib/types";
 import Header from "./Header";
 import SupplySummaryCard from "./SupplySummaryCard";
 import SupplyPieChart from "./SupplyPieChart";
 import ChainSupplyTable from "./ChainSupplyTable";
 import SupplyChart from "./SupplyChart";
+import PegMonitor from "./PegMonitor";
+import ComparisonView from "./ComparisonView";
 import { SkeletonCard, SkeletonTable, SkeletonChart } from "./Skeleton";
+
+interface ChainChange {
+  change24h: number | null;
+  change7d: number | null;
+}
+
+interface PegOverview extends PegData {
+  change1d: number | null;
+  change7d: number | null;
+  change1m: number | null;
+  totalSupply: number;
+}
 
 export default function Dashboard() {
   const [activeToken, setActiveToken] = useState<Stablecoin>("USDT");
   const [timeRange, setTimeRange] = useState<TimeRange>("1y");
+  const [comparisonTimeRange, setComparisonTimeRange] = useState<TimeRange>("1y");
+  const [showComparison, setShowComparison] = useState(false);
   const [supplyData, setSupplyData] = useState<ChainSupply[]>([]);
-  const [historyData, setHistoryData] = useState<{
-    usdt: HistoryPoint[];
-    usdc: HistoryPoint[];
-  }>({ usdt: [], usdc: [] });
+  const [historyData, setHistoryData] = useState<Record<string, HistoryPoint[]>>({});
+  const [pegData, setPegData] = useState<PegData[]>([]);
+  const [overviewData, setOverviewData] = useState<PegOverview[]>([]);
+  const [chainChanges, setChainChanges] = useState<Record<string, Record<string, ChainChange>>>({});
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [loadingSupply, setLoadingSupply] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(true);
@@ -53,18 +70,57 @@ export default function Dashboard() {
     }
   }, []);
 
+  const fetchPeg = useCallback(async () => {
+    try {
+      const res = await fetch("/api/peg");
+      const json = await res.json();
+      const data = json.data ?? [];
+      setPegData(data.map((d: PegOverview) => ({
+        symbol: d.symbol,
+        price: d.price,
+        change24h: d.change24h,
+      })));
+      setOverviewData(data);
+    } catch (err) {
+      console.error("Failed to fetch peg:", err);
+    }
+  }, []);
+
+  const fetchDetail = useCallback(async (symbol: string) => {
+    try {
+      const res = await fetch(`/api/detail?symbol=${symbol}`);
+      const json = await res.json();
+      if (json.changes) {
+        setChainChanges((prev) => ({ ...prev, [symbol]: json.changes }));
+      }
+    } catch {
+      // non-critical
+    }
+  }, []);
+
   useEffect(() => {
     fetchSupply();
     fetchHistory();
+    fetchPeg();
 
-    // Refresh supply every 60s
     const interval = setInterval(fetchSupply, 60_000);
     return () => clearInterval(interval);
-  }, [fetchSupply, fetchHistory]);
+  }, [fetchSupply, fetchHistory, fetchPeg]);
+
+  // Fetch detail data when active token changes
+  useEffect(() => {
+    fetchDetail(activeToken);
+  }, [activeToken, fetchDetail]);
 
   const chainsByToken = supplyData.filter((c) => c.token === activeToken);
-  const activeHistory =
-    activeToken === "USDT" ? historyData.usdt : historyData.usdc;
+  const activeHistory = historyData[activeToken.toLowerCase()] ?? [];
+  const activePeg = pegData.find(
+    (p) => p.symbol.toUpperCase() === activeToken.toUpperCase()
+  );
+  const activeOverview = overviewData.find(
+    (o) => o.symbol.toUpperCase() === activeToken.toUpperCase()
+  );
+  const activeChanges = chainChanges[activeToken];
 
   return (
     <div className="min-h-screen px-4 py-8 max-w-6xl mx-auto">
@@ -72,40 +128,76 @@ export default function Dashboard() {
         activeToken={activeToken}
         onTokenChange={setActiveToken}
         lastUpdated={lastUpdated}
+        showComparison={showComparison}
+        onToggleComparison={() => setShowComparison((s) => !s)}
       />
 
       <div className="space-y-6">
-        {/* Summary Card */}
-        {loadingSupply ? (
-          <SkeletonCard />
-        ) : (
-          <SupplySummaryCard token={activeToken} chains={chainsByToken} />
-        )}
+        {/* Peg Monitor */}
+        {pegData.length > 0 && <PegMonitor pegData={pegData} />}
 
-        {/* Pie Chart */}
-        {loadingSupply ? (
-          <SkeletonChart />
+        {showComparison ? (
+          /* Comparison View */
+          loadingHistory ? (
+            <SkeletonChart />
+          ) : (
+            <ComparisonView
+              historyData={historyData}
+              timeRange={comparisonTimeRange}
+              onTimeRangeChange={setComparisonTimeRange}
+            />
+          )
         ) : (
-          <SupplyPieChart token={activeToken} chains={chainsByToken} />
-        )}
+          <>
+            {/* Summary Card */}
+            {loadingSupply ? (
+              <SkeletonCard />
+            ) : (
+              <SupplySummaryCard
+                token={activeToken}
+                chains={chainsByToken}
+                pegData={activePeg}
+                supplyChange={
+                  activeOverview
+                    ? {
+                        change1d: activeOverview.change1d,
+                        change7d: activeOverview.change7d,
+                      }
+                    : undefined
+                }
+              />
+            )}
 
-        {/* History Chart */}
-        {loadingHistory ? (
-          <SkeletonChart />
-        ) : (
-          <SupplyChart
-            data={activeHistory}
-            token={activeToken}
-            timeRange={timeRange}
-            onTimeRangeChange={setTimeRange}
-          />
-        )}
+            {/* Pie Chart */}
+            {loadingSupply ? (
+              <SkeletonChart />
+            ) : (
+              <SupplyPieChart token={activeToken} chains={chainsByToken} />
+            )}
 
-        {/* Table */}
-        {loadingSupply ? (
-          <SkeletonTable />
-        ) : (
-          <ChainSupplyTable token={activeToken} chains={chainsByToken} />
+            {/* History Chart */}
+            {loadingHistory ? (
+              <SkeletonChart />
+            ) : (
+              <SupplyChart
+                data={activeHistory}
+                token={activeToken}
+                timeRange={timeRange}
+                onTimeRangeChange={setTimeRange}
+              />
+            )}
+
+            {/* Table */}
+            {loadingSupply ? (
+              <SkeletonTable />
+            ) : (
+              <ChainSupplyTable
+                token={activeToken}
+                chains={chainsByToken}
+                changes={activeChanges}
+              />
+            )}
+          </>
         )}
       </div>
 

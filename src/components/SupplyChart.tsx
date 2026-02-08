@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { HistoryPoint, Stablecoin, TimeRange } from "@/lib/types";
 import { formatSupply, formatChartDate } from "@/lib/format";
+import { getStablecoinColor } from "@/lib/config";
 
 interface SupplyChartProps {
   data: HistoryPoint[];
@@ -46,7 +47,7 @@ export default function SupplyChart({
     [data, timeRange]
   );
 
-  const color = token === "USDT" ? "#26A17B" : "#2775CA";
+  const color = getStablecoinColor(token);
 
   if (filtered.length === 0) {
     return (
